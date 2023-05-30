@@ -8,7 +8,7 @@ public class StudentDatabaseDriver {
 
     public static void main(String[] args) throws IOException {
         Scanner scan = new Scanner(System.in);
-        System.out.print("Enter a file name to process: "); //StudentDB/StudentDatabase/data/testFile.txt
+        System.out.print("Enter a file name to process: "); //StudentDatabase/data/testFile.txt
         String fileName = scan.nextLine().trim();
         Scanner fileReader = new Scanner(new File(fileName));
 
@@ -30,8 +30,8 @@ public class StudentDatabaseDriver {
                     }
                 }
         }
-//        for (int i = 0; i < prizeCount; i++)
-//            prizeList[i].awardPrize(studentDB);
+        for (int i = 0; i < prizeCount; i++)
+            prizeList[i].awardPrize(studentDB);
 
 
         studentDB.printRecords();

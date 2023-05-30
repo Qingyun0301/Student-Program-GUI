@@ -1,5 +1,7 @@
 package studentdatabase;
 
+import java.util.ArrayList;
+
 /**
  * A class that represents a Student.
  */
@@ -8,14 +10,14 @@ public class Student {
     private String familyName;
     private String givenNames;
     protected String degree;
-
-
+    private ArrayList<String> prizes;
 
     public Student(String studentID, String familyName, String givenNames) {
         this.studentID = studentID;
         this.familyName = familyName;
         this.givenNames = givenNames;
-        degree = "Science";
+        this.degree = "Science";
+        this.prizes = new ArrayList<>();
     }
 
     public String getStudentID() {
@@ -28,6 +30,10 @@ public class Student {
 
     public String getGivenNames() {
         return givenNames;
+    }
+
+    public void addPrize(String prize) {
+        prizes.add(prize);
     }
 
     public String printResults() {

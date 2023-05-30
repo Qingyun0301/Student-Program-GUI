@@ -16,18 +16,32 @@ public class StudentDatabase {
         topicResults = new ArrayList<>();
     }
 
-    public Student findStudent(String studentID){
+    public Student findStudent(String studentID) {
         for (Student s : studentDatabase) {
-            if (studentID.equals(s.getStudentID())){
+            if (studentID.equals(s.getStudentID())) {
                 return s;
             }
-        }return null;
+        }
+        return null;
+    }
+
+    public Result findResult(String studentID, String topicCode) {
+        for (Student s : studentDatabase) {
+            if (studentID.equals(s.getStudentID())) {
+                for (Result r : topicResults) {
+                    if (s.getStudentID().equals(r.getStudentID())) {
+                        return r;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     public void addStudent(String s) {
         Scanner vars = new Scanner(s);
         vars.useDelimiter(",");
-        vars.next(); //get rid of the first letter (S,A,M)
+        String studentType = vars.next(); //get rid of the first letter (S,A,M)
         String studentID = vars.next(); //and read the studentID
 
         /*add student information into studentDatabase<> based on their type
@@ -35,26 +49,26 @@ public class StudentDatabase {
          * M->Med student
          * S->Science student
          */
-        switch (s.charAt(0)) {
-            case 'A':
+        switch (studentType) {
+            case "A":
                 String aFamilyName = vars.next();
                 String aGivenNames = vars.next();
                 String artMajor = vars.next();
                 String artMinor = vars.next();
                 studentDatabase.add(new ArtsStudent(studentID, aFamilyName, aGivenNames, artMajor, artMinor));
                 break;
-            case 'M':
+            case "M":
                 String mFamilyName = vars.next();
                 String mGivenNames = vars.next();
                 String medPrize = vars.next();
                 studentDatabase.add(new MedStudent(studentID, mFamilyName, mGivenNames, medPrize));
                 break;
-            case 'S':
+            case "S":
                 String sFamilyName = vars.next();
                 String sGivenNames = vars.next();
                 studentDatabase.add(new Student(studentID, sFamilyName, sGivenNames));
                 break;
-            case 'P':
+            case "P":
                 break;
             default:
         }
@@ -67,7 +81,7 @@ public class StudentDatabase {
         vars.next();
 
         switch (s.charAt(0)) {
-            case 'R':
+            case 'R' -> {
                 String studentID = vars.next();
                 String topic = vars.next();
                 String grade = vars.next();
@@ -76,19 +90,13 @@ public class StudentDatabase {
                     mark = vars.next();
                 }
                 topicResults.add(new Result(studentID, topic, grade, mark));
-                break;
+            }
         }
     }
 
 
-
-    public void awardPrize(String prize, String template, int topicsRequired) {
-
-    }
-
-
     //use nested for loop, only print out the topic results when studentID matched
-    public void printRecords() throws IOException {
+    public void printRecords() {
         for (Student s : studentDatabase) {
             System.out.print(s.printResults());
             for (Result r : topicResults) {
@@ -111,7 +119,7 @@ public class StudentDatabase {
         }
 
         try {
-            FileWriter fw = new FileWriter("StudentDB/StudentDatabase/data/record.txt");
+            FileWriter fw = new FileWriter("StudentDatabase/data/record.txt");
             fw.write(txt);
             fw.close();
         } catch (Exception e) {
@@ -123,5 +131,4 @@ public class StudentDatabase {
         studentDatabase.clear();
         topicResults.clear();
     }
-
 }

@@ -10,13 +10,15 @@ public class StudentProgramPanel extends JPanel {
     public int CALC_HEIGHT = 800;
     public JButton addTopicButton, findTopicButton, addStudentButton, findStudentButton, printAllRecordsButton, clearAllRecordsButton,
             awardPrize;
-    public JComboBox degreeComboBox, gradeComboBox;
+    public JComboBox<String> degreeComboBox;
+    public JComboBox<String> gradeComboBox;
     public JPanel panel1, panel2, panel3, studentDetailsWrapperPanel, topicDetailsWrapperPanel, studentDetailsPanel, topicDetailsPanel,
             degreeOptionsWrapperPanel, degreeOptionsPanel, awardPrizesWrapperPanel, awardPrizesPanel;
-    public JLabel title, studentNumber, familyName, givenName, degree, artsMajor, artsMinor;
+    public JLabel title, degree;
     public JScrollPane scroll;
     public JTextArea textArea;
-    public JTextField studentNumberTextField, familyNameTextField, givenNameTextField, artsMajorTextField, artsMinorTextField;
+    public JTextField studentNumberTextField, familyNameTextField, givenNameTextField, artsMajorTextField, artsMinorTextField, topicCodeTextField,
+            markTextField;
 
 
     public StudentProgramPanel() {
@@ -38,21 +40,18 @@ public class StudentProgramPanel extends JPanel {
         studentDetailsPanel = new JPanel(new GridLayout(4, 2));
         studentDetailsPanel.setPreferredSize(new Dimension(350, 150));
         studentDetailsPanel.setBorder(BorderFactory.createTitledBorder("Student Details"));
-        studentNumber = new JLabel("Student Number");
+        studentDetailsPanel.add(new JLabel("Student Number"));
         studentNumberTextField = new JTextField();
-        studentDetailsPanel.add(studentNumber);
         studentDetailsPanel.add(studentNumberTextField);
-        familyName = new JLabel("Family Name");
+        studentDetailsPanel.add(new JLabel("Family Name"));
         familyNameTextField = new JTextField();
-        studentDetailsPanel.add(familyName);
         studentDetailsPanel.add(familyNameTextField);
-        givenName = new JLabel("Given Name(s)");
+        studentDetailsPanel.add(new JLabel("Given Name(s)"));
         givenNameTextField = new JTextField();
-        studentDetailsPanel.add(givenName);
         studentDetailsPanel.add(givenNameTextField);
         degree = new JLabel("Degree");
         String[] degreeOptions = {"Arts", "Medicine", "Science"};
-        degreeComboBox = new JComboBox(degreeOptions);
+        degreeComboBox = new JComboBox<>(degreeOptions);
         studentDetailsPanel.add(degree);
         studentDetailsPanel.add(degreeComboBox);
 
@@ -66,15 +65,20 @@ public class StudentProgramPanel extends JPanel {
         topicDetailsPanel.setPreferredSize(new Dimension(350, 150));
         topicDetailsPanel.setBorder(BorderFactory.createTitledBorder("Topic Details"));
         topicDetailsPanel.add(new JLabel("Topic Code"));
-        topicDetailsPanel.add(new JTextField());
+        topicCodeTextField = new JTextField();
+        topicDetailsPanel.add(topicDetailsPanel);
         topicDetailsPanel.add(new JLabel("Grade"));
         String[] gradeOptions = {"HD", "DN", "CR", "PS", "FL"};
-        gradeComboBox = new JComboBox(gradeOptions);
+        gradeComboBox = new JComboBox<>(gradeOptions);
         topicDetailsPanel.add(gradeComboBox);
         topicDetailsPanel.add(new JLabel("Mark"));
+        markTextField = new JTextField();
+        topicDetailsPanel.add(markTextField);
         topicDetailsPanel.add(new JTextField());
         addTopicButton = new JButton("Add Topic Result");
+        addTopicButton.setActionCommand("add topic result");
         findTopicButton = new JButton("Find Topic Result");
+        findTopicButton.setActionCommand("find topic result");
         topicDetailsPanel.add(addTopicButton);
         topicDetailsPanel.add(findTopicButton);
 
@@ -101,13 +105,11 @@ public class StudentProgramPanel extends JPanel {
         degreeOptionsPanel = new JPanel(new GridLayout(3, 2));
         degreeOptionsPanel.setPreferredSize(new Dimension(350, 150));
         degreeOptionsPanel.setBorder(BorderFactory.createTitledBorder("Degree Options"));
-        artsMajor = new JLabel("Arts Major");
+        degreeOptionsPanel.add(new JLabel("Arts Major"));
         artsMajorTextField = new JTextField();
-        degreeOptionsPanel.add(artsMajor);
         degreeOptionsPanel.add(artsMajorTextField);
-        artsMinor = new JLabel("Arts Minor");
+        degreeOptionsPanel.add(new JLabel("Arts Minor"));
         artsMinorTextField = new JTextField();
-        degreeOptionsPanel.add(artsMinor);
         degreeOptionsPanel.add(artsMinorTextField);
 
         degreeOptionsPanel.add(new JLabel("Medicine Prizes"));
@@ -169,10 +171,10 @@ public class StudentProgramPanel extends JPanel {
         findStudentButton.addActionListener(new StudentProgramPanel.StudentFunctionButtonListener());
         findStudentButton.setActionCommand("find student");
         printAllRecordsButton = new JButton("Print All Records");
-        printAllRecordsButton.addActionListener(new StudentProgramPanel.StudentFunctionButtonListener());
+        printAllRecordsButton.addActionListener(new StudentProgramPanel.TopicFunctionButtonListener());
         printAllRecordsButton.setActionCommand("print records");
         clearAllRecordsButton = new JButton("Clear All Records");
-        clearAllRecordsButton.addActionListener(new StudentProgramPanel.StudentFunctionButtonListener());
+        clearAllRecordsButton.addActionListener(new StudentProgramPanel.TopicFunctionButtonListener());
         clearAllRecordsButton.setActionCommand("clear records");
 
         // Set up the panel 3
@@ -189,6 +191,7 @@ public class StudentProgramPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
 
+            // Add student button listener
             if (e.getActionCommand().equals("add student")) {
                 // Firstly find the student in the database
                 StudentDatabase studentDB = new StudentDatabase();
@@ -229,15 +232,96 @@ public class StudentProgramPanel extends JPanel {
                 addStudentButton.setActionCommand("add student");
                 clearFields();
             }
+
+
+            // Find student button listener
+            if (e.getActionCommand().equals("find student")) {
+                StudentDatabase studentDB = new StudentDatabase();
+                String studentID = studentNumberTextField.getText();
+                Student existingStudent = studentDB.findStudent(studentID);
+
+                if (existingStudent == null) {
+                    JOptionPane.showMessageDialog(StudentProgramPanel.this, "Student not found in the database.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    // Update the student details fields with the values from the existing student
+                    familyNameTextField.setText(existingStudent.getFamilyName());
+                    givenNameTextField.setText(existingStudent.getGivenNames());
+
+                    // Check the type of student and update the degree combo box value
+                    if (existingStudent instanceof ArtsStudent artsStudent) {
+                        degreeComboBox.setSelectedItem("Arts");
+                        artsMajorTextField.setText(artsStudent.getMajor());
+                        artsMinorTextField.setText(artsStudent.getMinor());
+                    } else if (existingStudent instanceof MedStudent medStudent) {
+                        degreeComboBox.setSelectedItem("Medicine");
+                        textArea.setText(medStudent.getPrize());
+                    } else {
+                        degreeComboBox.setSelectedItem("Science");
+                    }
+                }
+            }
         }
-        private void clearFields() {
-            studentNumberTextField.setText("");
-            familyNameTextField.setText("");
-            givenNameTextField.setText("");
-            degreeComboBox.setSelectedIndex(0);
-            artsMajorTextField.setText("");
-            artsMinorTextField.setText("");
-            textArea.setText("");
+    }
+
+
+    private void clearFields() {
+        studentNumberTextField.setText("");
+        familyNameTextField.setText("");
+        givenNameTextField.setText("");
+        degreeComboBox.setSelectedIndex(0);
+        artsMajorTextField.setText("");
+        artsMinorTextField.setText("");
+        textArea.setText("");
+    }
+
+    public class TopicFunctionButtonListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (e.getActionCommand().equals("Add Topic Result")) {
+                String topicCode = topicCodeTextField.getText();
+                String grade = (String) gradeComboBox.getSelectedItem();
+                String mark = markTextField.getText();
+
+                if (topicCode.isEmpty() || grade.isEmpty()) {
+                    JOptionPane.showMessageDialog(StudentProgramPanel.this, "Please enter a topic code and grade.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    // Add the topic result for the student
+                    String studentID = studentNumberTextField.getText();
+                    StudentDatabase studentDB = new StudentDatabase();
+                    Student student = studentDB.findStudent(studentID);
+
+                    if (student != null) {
+                        studentDB.addResult(studentID + "," + topicCode + "," + grade + "," + mark);
+                        JOptionPane.showMessageDialog(StudentProgramPanel.this, "Topic result has been added to the database.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(StudentProgramPanel.this, "Student not found in the database.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+
+            // Find topic result button listener
+            if (e.getActionCommand().equals("Find Topic Result")) {
+                String studentID = studentNumberTextField.getText();
+                String topicCode = topicCodeTextField.getText();
+
+                StudentDatabase studentDB = new StudentDatabase();
+                Student student = studentDB.findStudent(studentID);
+
+                if (student != null) {
+                    Result result = studentDB.findResult(studentID,topicCode);
+                    if (result != null) {
+                        gradeComboBox.setSelectedItem(result.getGrade());
+                        markTextField.setText(String.valueOf(result.getMark()));
+                    } else {
+                        gradeComboBox.setSelectedIndex(0);
+                        markTextField.setText("");
+                        JOptionPane.showMessageDialog(StudentProgramPanel.this, "No matching topic result found.", "Message", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(StudentProgramPanel.this, "Student not found in the database.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
         }
     }
 }

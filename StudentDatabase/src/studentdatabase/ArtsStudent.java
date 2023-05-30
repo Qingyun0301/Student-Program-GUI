@@ -4,6 +4,14 @@ public class ArtsStudent extends Student {
     protected String major;
     protected String minor;
 
+    public String getMajor() {
+        return major;
+    }
+
+    public String getMinor() {
+        return minor;
+    }
+
     public ArtsStudent(String studentID, String familyName, String givenNames, String artMajor, String artMinor) {
         super(studentID, familyName, givenNames);
         degree = "Arts";
