@@ -36,7 +36,6 @@ public class MedStudent extends Student {
         }
     }
 
-
     //override the printResults from its parent Student
     @Override
     public String printResults() {

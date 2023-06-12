@@ -1,11 +1,10 @@
 package studentdatabase;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,6 +12,7 @@ import java.io.IOException;
 public class StudentProgramPanel extends JPanel {
     private StudentDatabase studentDB;
     private String filePath;
+    private Prize prize;
     public int CALC_WIDTH = 800;
     public int CALC_HEIGHT = 500;
     public JButton addTopicButton, findTopicButton, addStudentButton, findStudentButton, printAllRecordsButton, clearAllRecordsButton,
@@ -25,11 +25,12 @@ public class StudentProgramPanel extends JPanel {
     public JScrollPane scroll;
     public JTextArea textArea;
     public JTextField studentNumberTextField, familyNameTextField, givenNameTextField, artsMajorTextField, artsMinorTextField, topicCodeTextField,
-            markTextField;
+            markTextField, prizeNameTextField, templateTextField, numOfTopicTextField;
 
-    public StudentProgramPanel(StudentDatabase studentDB, String filePath) {
+    public StudentProgramPanel(StudentDatabase studentDB, String filePath, Prize prize) {
         this.studentDB = studentDB;
         this.filePath = filePath;
+        this.prize = prize;
         // Set the whole panel size
         setPreferredSize(new Dimension(CALC_WIDTH, CALC_HEIGHT));
 
@@ -49,6 +50,16 @@ public class StudentProgramPanel extends JPanel {
         studentDetailsPanel.setBorder(BorderFactory.createTitledBorder("Student Details"));
         studentDetailsPanel.add(new JLabel("Student Number"));
         studentNumberTextField = new JTextField();
+        studentNumberTextField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                validateStudentNumber();
+            }
+        });
         studentDetailsPanel.add(studentNumberTextField);
         studentDetailsPanel.add(new JLabel("Family Name"));
         familyNameTextField = new JTextField();
@@ -146,12 +157,17 @@ public class StudentProgramPanel extends JPanel {
         awardPrizesPanel.setPreferredSize(new Dimension(350, 150));
         awardPrizesPanel.setBorder(BorderFactory.createTitledBorder("Award Prizes"));
         awardPrizesPanel.add(new JLabel("Prize Name"));
-        awardPrizesPanel.add(new JTextField());
+        prizeNameTextField = new JTextField();
+        awardPrizesPanel.add(prizeNameTextField);
         awardPrizesPanel.add(new JLabel("Template"));
-        awardPrizesPanel.add(new JTextField());
+        templateTextField = new JTextField();
+        awardPrizesPanel.add(templateTextField);
         awardPrizesPanel.add(new JLabel("Numbers of Topics"));
-        awardPrizesPanel.add(new JTextField());
+        numOfTopicTextField = new JTextField();
+        awardPrizesPanel.add(numOfTopicTextField);
         awardPrize = new JButton("Award Prize");
+        awardPrize.setActionCommand("award prize");
+        awardPrize.addActionListener(new StudentProgramPanel.AwardPrizeButton());
         awardPrizesPanel.add(awardPrize);
 
         // Set up a wrapper panel for awardPrizesPanel
@@ -194,6 +210,21 @@ public class StudentProgramPanel extends JPanel {
         add(panel3);
     }
 
+    private void validateStudentNumber() {
+        String input = studentNumberTextField.getText();
+
+        if (!input.matches("\\d{7}")) {
+            if (!input.isEmpty()) {
+                // Show error message
+                JOptionPane.showMessageDialog(null, "Invalid student number. Please enter exactly 7 digits.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    public StudentProgramPanel(StudentDatabase studentDB, String filePath) {
+        this(studentDB, filePath, null); // Call the other constructor with a null Prize parameter
+    }
+
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
@@ -213,6 +244,7 @@ public class StudentProgramPanel extends JPanel {
                     String familyName = familyNameTextField.getText();
                     String givenName = givenNameTextField.getText();
                     String degree = (String) degreeComboBox.getSelectedItem();
+
                     String artMajor = artsMajorTextField.getText();
                     String artMinor = artsMinorTextField.getText();
                     String medPrize = textArea.getText();
@@ -221,9 +253,9 @@ public class StudentProgramPanel extends JPanel {
                     if (degree.equals("Arts")) {
                         s = "A," + studentID + "," + familyName + "," + givenName + "," + artMajor + "," + artMinor;
                     } else if (degree.equals("Medicine")) {
-                        if (medPrize == null){
+                        if (medPrize == null) {
                             s = "M," + studentID + "," + familyName + "," + givenName;
-                        }else {
+                        } else {
                             s = "M," + studentID + "," + familyName + "," + givenName + "," + medPrize;
                         }
                     } else if (degree.equals("Science")) {
@@ -359,7 +391,6 @@ public class StudentProgramPanel extends JPanel {
             if (e.getActionCommand().equals("find topic result")) {
                 String studentID = studentNumberTextField.getText();
                 String topicCode = topicCodeTextField.getText();
-                Student existingStudent = studentDB.findStudent(studentID);
                 Result result;
                 if (studentID.isEmpty() || topicCode.isEmpty()) {
                     JOptionPane.showMessageDialog(StudentProgramPanel.this, "Please enter a student ID and topic code.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -392,6 +423,21 @@ public class StudentProgramPanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             if (e.getActionCommand().equals("clear records")) {
                 studentDB.clearRecords();
+            }
+        }
+    }
+
+    public class AwardPrizeButton implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            if (e.getActionCommand().equals("award prize")) {
+
+                String prizeName = prizeNameTextField.getText();
+                String template = templateTextField.getText();
+                int numOfTopics = Integer.parseInt(numOfTopicTextField.getText());
+                String prizeReord = "P," + prizeName + template + numOfTopics;
+                prize.awardPrize(studentDB);
             }
         }
     }

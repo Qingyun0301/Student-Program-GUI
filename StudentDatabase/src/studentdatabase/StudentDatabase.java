@@ -65,7 +65,6 @@ public class StudentDatabase {
                     studentDatabase.add(new MedStudent(studentID, mFamilyName, mGivenNames));
                 }
 
-
                 break;
             case "S":
                 String sFamilyName = vars.next();
@@ -98,7 +97,6 @@ public class StudentDatabase {
         }
     }
 
-
     //use nested for loop, only print out the topic results when studentID matched
     public void printRecords() {
         for (Student s : studentDatabase) {
@@ -117,15 +115,15 @@ public class StudentDatabase {
             txt += s.printResults();
             for (Result r : topicResults) {
                 if (s.getStudentID().equals(r.getStudentID())) {
-                    txt += r.printResults();
+                    txt += r.printResults() + "\n";
                 }
             }
             txt += "\n";
         }
 
         try {
-            FileWriter fw = new FileWriter("record.txt");
-            fw.write(txt);
+            FileWriter fw = new FileWriter("StudentDatabase/data/record.txt");
+            fw.write(txt.trim());
             fw.close();
         } catch (Exception e) {
             e.printStackTrace();
