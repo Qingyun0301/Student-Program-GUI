@@ -41,8 +41,8 @@ public class StudentDatabase {
     public void addStudent(String s) {
         Scanner vars = new Scanner(s);
         vars.useDelimiter(",");
-        String studentType = vars.next(); //get rid of the first letter (S,A,M)
-        String studentID = vars.next(); //and read the studentID
+        String studentType = vars.next();
+        String studentID = vars.next();
 
         /*add student information into studentDatabase<> based on their type
          * A->Arts student
@@ -112,14 +112,15 @@ public class StudentDatabase {
         for (Student s : studentDatabase) {
             txt += s.printResults();
             for (Result r : topicResults) {
-                if (s.getStudentID().equals(r.getStudentID()))
-                    txt += r.printResults() + "\n";
+                if (s.getStudentID().equals(r.getStudentID())) {
+                    txt += r.printResults();
+                }
             }
             txt += "\n";
         }
 
         try {
-            FileWriter fw = new FileWriter("StudentDatabase/data/record.txt");
+            FileWriter fw = new FileWriter("record.txt");
             fw.write(txt);
             fw.close();
         } catch (Exception e) {

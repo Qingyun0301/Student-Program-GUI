@@ -24,4 +24,8 @@ public class ArtsStudent extends Student {
     public String printResults() {
         return super.printResults() + "Major: " + major + "\n" + "Minor: " + minor + "\n";
     }
+
+    public String toTxtFile(){
+        return "A" + "," + super.getStudentID() + "," + super.getFamilyName() + "," + super.getGivenNames() + "," + major + "," + minor;
+    }
 }

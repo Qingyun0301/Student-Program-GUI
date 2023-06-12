@@ -33,7 +33,6 @@ public class StudentDatabaseDriver {
         for (int i = 0; i < prizeCount; i++)
             prizeList[i].awardPrize(studentDB);
 
-
         studentDB.printRecords();
 
     }

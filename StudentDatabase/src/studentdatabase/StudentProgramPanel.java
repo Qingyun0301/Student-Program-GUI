@@ -4,8 +4,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class StudentProgramPanel extends JPanel {
+    private StudentDatabase studentDB;
+    private String filePath;
     public int CALC_WIDTH = 800;
     public int CALC_HEIGHT = 800;
     public JButton addTopicButton, findTopicButton, addStudentButton, findStudentButton, printAllRecordsButton, clearAllRecordsButton,
@@ -20,9 +27,9 @@ public class StudentProgramPanel extends JPanel {
     public JTextField studentNumberTextField, familyNameTextField, givenNameTextField, artsMajorTextField, artsMinorTextField, topicCodeTextField,
             markTextField;
 
-
-    public StudentProgramPanel() {
-
+    public StudentProgramPanel(StudentDatabase studentDB, String filePath) {
+        this.studentDB = studentDB;
+        this.filePath = filePath;
         // Set the whole panel size
         setPreferredSize(new Dimension(CALC_WIDTH, CALC_HEIGHT));
 
@@ -66,7 +73,7 @@ public class StudentProgramPanel extends JPanel {
         topicDetailsPanel.setBorder(BorderFactory.createTitledBorder("Topic Details"));
         topicDetailsPanel.add(new JLabel("Topic Code"));
         topicCodeTextField = new JTextField();
-        topicDetailsPanel.add(topicDetailsPanel);
+        topicDetailsPanel.add(topicCodeTextField);
         topicDetailsPanel.add(new JLabel("Grade"));
         String[] gradeOptions = {"HD", "DN", "CR", "PS", "FL"};
         gradeComboBox = new JComboBox<>(gradeOptions);
@@ -74,7 +81,6 @@ public class StudentProgramPanel extends JPanel {
         topicDetailsPanel.add(new JLabel("Mark"));
         markTextField = new JTextField();
         topicDetailsPanel.add(markTextField);
-        topicDetailsPanel.add(new JTextField());
         addTopicButton = new JButton("Add Topic Result");
         addTopicButton.setActionCommand("add topic result");
         findTopicButton = new JButton("Find Topic Result");
@@ -165,10 +171,10 @@ public class StudentProgramPanel extends JPanel {
         panel3 = new JPanel();
         panel3.setLayout(new FlowLayout(FlowLayout.LEFT, 60, 2));
         addStudentButton = new JButton("Add Student");
-        addStudentButton.addActionListener(new StudentProgramPanel.StudentFunctionButtonListener());
+        addStudentButton.addActionListener(new StudentProgramPanel.AddStudentButton());
         addStudentButton.setActionCommand("add student");
         findStudentButton = new JButton("Find Student");
-        findStudentButton.addActionListener(new StudentProgramPanel.StudentFunctionButtonListener());
+        findStudentButton.addActionListener(new StudentProgramPanel.FindStudentButton());
         findStudentButton.setActionCommand("find student");
         printAllRecordsButton = new JButton("Print All Records");
         printAllRecordsButton.addActionListener(new StudentProgramPanel.TopicFunctionButtonListener());
@@ -186,7 +192,11 @@ public class StudentProgramPanel extends JPanel {
         add(panel3);
     }
 
-    public class StudentFunctionButtonListener implements ActionListener {
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public class AddStudentButton implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -194,7 +204,6 @@ public class StudentProgramPanel extends JPanel {
             // Add student button listener
             if (e.getActionCommand().equals("add student")) {
                 // Firstly find the student in the database
-                StudentDatabase studentDB = new StudentDatabase();
                 String studentID = studentNumberTextField.getText();
                 Student existingStudent = studentDB.findStudent(studentID);
                 // If the student is new, add student to the studentDB
@@ -202,18 +211,35 @@ public class StudentProgramPanel extends JPanel {
                     String familyName = familyNameTextField.getText();
                     String givenName = givenNameTextField.getText();
                     String degree = (String) degreeComboBox.getSelectedItem();
+                    String artMajor = artsMajorTextField.getText();
+                    String artMinor = artsMinorTextField.getText();
+                    String medPrize = textArea.getText();
 
+                    String s;
                     switch (degree) {
-                        case "Arts" -> {
-                            String artMajor = artsMajorTextField.getText();
-                            String artMinor = artsMinorTextField.getText();
-                            studentDB.addStudent(studentID + "," + familyName + "," + givenName + "," + artMajor + "," + artMinor);
-                        }
-                        case "Medicine" -> {
-                            String medPrize = textArea.getText();
-                            studentDB.addStudent(studentID + "," + familyName + "," + givenName + "," + medPrize);
-                        }
-                        case "Science" -> studentDB.addStudent(studentID + "," + familyName + "," + givenName);
+                        case "Arts" ->
+                                s = "A," + studentID + "," + familyName + "," + givenName + "," + artMajor + "," + artMinor;
+                        case "Medicine" ->
+                                s = "M," + studentID + "," + familyName + "," + givenName + "," + medPrize;
+                        case "Science" ->
+                                s = "S," + studentID + "," + familyName + "," + givenName;
+                        default -> s = "";
+                    }
+
+                    studentDB.addStudent(s);
+
+
+                    // Save the student records to the file
+                    try {
+                        FileWriter fileWriter = new FileWriter(filePath, true); // "true" appends to the existing file
+                        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+                        bufferedWriter.write(s);
+                        bufferedWriter.newLine();
+                        bufferedWriter.close();
+                    } catch (IOException exception) {
+                        // Handle the exception
+                        exception.printStackTrace();
                     }
 
                     // Display information message, update button label, and clear fields
@@ -221,6 +247,7 @@ public class StudentProgramPanel extends JPanel {
                     addStudentButton.setText("Enter New Student");
                     addStudentButton.setActionCommand("enter new student");
                     clearFields();
+
                 } else {
                     // Student already exists, display error message and clear fields
                     JOptionPane.showMessageDialog(StudentProgramPanel.this, "Student already exists in the database.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -232,9 +259,15 @@ public class StudentProgramPanel extends JPanel {
                 addStudentButton.setActionCommand("add student");
                 clearFields();
             }
+        }
 
 
-            // Find student button listener
+    }
+
+
+    public class FindStudentButton implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
             if (e.getActionCommand().equals("find student")) {
                 StudentDatabase studentDB = new StudentDatabase();
                 String studentID = studentNumberTextField.getText();
@@ -262,7 +295,6 @@ public class StudentProgramPanel extends JPanel {
             }
         }
     }
-
 
     private void clearFields() {
         studentNumberTextField.setText("");
@@ -309,7 +341,7 @@ public class StudentProgramPanel extends JPanel {
                 Student student = studentDB.findStudent(studentID);
 
                 if (student != null) {
-                    Result result = studentDB.findResult(studentID,topicCode);
+                    Result result = studentDB.findResult(studentID, topicCode);
                     if (result != null) {
                         gradeComboBox.setSelectedItem(result.getGrade());
                         markTextField.setText(String.valueOf(result.getMark()));

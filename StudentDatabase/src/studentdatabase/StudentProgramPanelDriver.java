@@ -8,7 +8,9 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class StudentProgramPanelDriver {
-
+    private static StudentDatabase studentDB;
+    private static StudentProgramPanel panel;
+    static String filePath;
     public static void main(String[] args) {
         JFrame frame = new JFrame("Student Database Program");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -21,7 +23,8 @@ public class StudentProgramPanelDriver {
         fileMenu.add(openFileMenuItem);
         menuBar.add(fileMenu);
         frame.setJMenuBar(menuBar);
-        StudentProgramPanel panel = new StudentProgramPanel();
+        studentDB = new StudentDatabase();
+        panel = new StudentProgramPanel(studentDB, null);
         frame.getContentPane().add(panel);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
@@ -38,12 +41,14 @@ public class StudentProgramPanelDriver {
         public void actionPerformed(ActionEvent e) {
 
             if (e.getActionCommand().equals("openFile")) {
-                StudentDatabase studentDB = new StudentDatabase();
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("Open File");
                 int result = fileChooser.showOpenDialog(null);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
+                    // store the path of the opened file
+                    filePath = selectedFile.getAbsolutePath();
+                    panel.setFilePath(filePath);
                     // use try-catch block to handle the possibility that the file is not found
                     try {
                         Scanner scan = new Scanner(selectedFile);
@@ -66,6 +71,3 @@ public class StudentProgramPanelDriver {
         }
     }
 }
-
-
-

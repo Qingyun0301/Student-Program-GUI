@@ -40,4 +40,7 @@ public class Student {
         return "Academic Record for " + givenNames + " " + familyName + " (" + studentID + ")\n"
                 + "Degree: " + degree + "\n";
     }
+   public String toTxt(){
+        return degree.charAt(0)+"," + studentID+","+ familyName+"," + givenNames;
+   }
 }
