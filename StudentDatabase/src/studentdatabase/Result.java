@@ -6,6 +6,9 @@ public class Result {
     String grade;
     String mark;
 
+    public String getStudentID() {
+        return studentID;
+    }
     public String getTopic() {
         return topic;
     }
@@ -24,11 +27,6 @@ public class Result {
         this.grade = grade;
         this.mark = mark;
     }
-
-    public String getStudentID() {
-        return studentID;
-    }
-
 
     public String printResults() {
         return topic + " " + grade + " " + mark;

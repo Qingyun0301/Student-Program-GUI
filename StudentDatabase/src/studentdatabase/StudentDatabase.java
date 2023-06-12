@@ -1,7 +1,6 @@
 package studentdatabase;
 
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -26,12 +25,11 @@ public class StudentDatabase {
     }
 
     public Result findResult(String studentID, String topicCode) {
-        for (Student s : studentDatabase) {
-            if (studentID.equals(s.getStudentID())) {
-                for (Result r : topicResults) {
-                    if (s.getStudentID().equals(r.getStudentID())) {
-                        return r;
-                    }
+        //R,9821012,BIOL1000,HD,89
+        for (Result r : topicResults) {
+            if (studentID.equals(r.getStudentID())) {
+                if (topicCode.equals(r.getTopic())) {
+                    return r;
                 }
             }
         }

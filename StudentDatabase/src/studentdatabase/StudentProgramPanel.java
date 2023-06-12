@@ -14,7 +14,7 @@ public class StudentProgramPanel extends JPanel {
     private StudentDatabase studentDB;
     private String filePath;
     public int CALC_WIDTH = 800;
-    public int CALC_HEIGHT = 800;
+    public int CALC_HEIGHT = 500;
     public JButton addTopicButton, findTopicButton, addStudentButton, findStudentButton, printAllRecordsButton, clearAllRecordsButton,
             awardPrize;
     public JComboBox<String> degreeComboBox;
@@ -82,8 +82,10 @@ public class StudentProgramPanel extends JPanel {
         markTextField = new JTextField();
         topicDetailsPanel.add(markTextField);
         addTopicButton = new JButton("Add Topic Result");
+        addTopicButton.addActionListener(new StudentProgramPanel.AddTopicButton());
         addTopicButton.setActionCommand("add topic result");
         findTopicButton = new JButton("Find Topic Result");
+        findTopicButton.addActionListener(new StudentProgramPanel.FindTopicResultButton());
         findTopicButton.setActionCommand("find topic result");
         topicDetailsPanel.add(addTopicButton);
         topicDetailsPanel.add(findTopicButton);
@@ -177,10 +179,10 @@ public class StudentProgramPanel extends JPanel {
         findStudentButton.addActionListener(new StudentProgramPanel.FindStudentButton());
         findStudentButton.setActionCommand("find student");
         printAllRecordsButton = new JButton("Print All Records");
-        printAllRecordsButton.addActionListener(new StudentProgramPanel.TopicFunctionButtonListener());
+        printAllRecordsButton.addActionListener(new StudentProgramPanel.PrintAllRecordsButton());
         printAllRecordsButton.setActionCommand("print records");
         clearAllRecordsButton = new JButton("Clear All Records");
-        clearAllRecordsButton.addActionListener(new StudentProgramPanel.TopicFunctionButtonListener());
+        clearAllRecordsButton.addActionListener(new StudentProgramPanel.ClearAllRecordsButton());
         clearAllRecordsButton.setActionCommand("clear records");
 
         // Set up the panel 3
@@ -219,21 +221,17 @@ public class StudentProgramPanel extends JPanel {
                     switch (degree) {
                         case "Arts" ->
                                 s = "A," + studentID + "," + familyName + "," + givenName + "," + artMajor + "," + artMinor;
-                        case "Medicine" ->
-                                s = "M," + studentID + "," + familyName + "," + givenName + "," + medPrize;
-                        case "Science" ->
-                                s = "S," + studentID + "," + familyName + "," + givenName;
+                        case "Medicine" -> s = "M," + studentID + "," + familyName + "," + givenName + "," + medPrize;
+                        case "Science" -> s = "S," + studentID + "," + familyName + "," + givenName;
                         default -> s = "";
                     }
 
                     studentDB.addStudent(s);
 
-
                     // Save the student records to the file
                     try {
                         FileWriter fileWriter = new FileWriter(filePath, true); // "true" appends to the existing file
                         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
                         bufferedWriter.write(s);
                         bufferedWriter.newLine();
                         bufferedWriter.close();
@@ -260,8 +258,16 @@ public class StudentProgramPanel extends JPanel {
                 clearFields();
             }
         }
+    }
 
-
+    private void clearFields() {
+        studentNumberTextField.setText("");
+        familyNameTextField.setText("");
+        givenNameTextField.setText("");
+        degreeComboBox.setSelectedIndex(0);
+        artsMajorTextField.setText("");
+        artsMinorTextField.setText("");
+        textArea.setText("");
     }
 
 
@@ -269,7 +275,6 @@ public class StudentProgramPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getActionCommand().equals("find student")) {
-                StudentDatabase studentDB = new StudentDatabase();
                 String studentID = studentNumberTextField.getText();
                 Student existingStudent = studentDB.findStudent(studentID);
 
@@ -279,7 +284,6 @@ public class StudentProgramPanel extends JPanel {
                     // Update the student details fields with the values from the existing student
                     familyNameTextField.setText(existingStudent.getFamilyName());
                     givenNameTextField.setText(existingStudent.getGivenNames());
-
                     // Check the type of student and update the degree combo box value
                     if (existingStudent instanceof ArtsStudent artsStudent) {
                         degreeComboBox.setSelectedItem("Arts");
@@ -296,52 +300,65 @@ public class StudentProgramPanel extends JPanel {
         }
     }
 
-    private void clearFields() {
-        studentNumberTextField.setText("");
-        familyNameTextField.setText("");
-        givenNameTextField.setText("");
-        degreeComboBox.setSelectedIndex(0);
-        artsMajorTextField.setText("");
-        artsMinorTextField.setText("");
-        textArea.setText("");
-    }
 
-    public class TopicFunctionButtonListener implements ActionListener {
+    public class AddTopicButton implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getActionCommand().equals("Add Topic Result")) {
+            if (e.getActionCommand().equals("add topic result")) {
                 String topicCode = topicCodeTextField.getText();
                 String grade = (String) gradeComboBox.getSelectedItem();
                 String mark = markTextField.getText();
-
-                if (topicCode.isEmpty() || grade.isEmpty()) {
-                    JOptionPane.showMessageDialog(StudentProgramPanel.this, "Please enter a topic code and grade.", "Error", JOptionPane.ERROR_MESSAGE);
+                String studentID = studentNumberTextField.getText();
+                if (studentID.isEmpty() || topicCode.isEmpty()) {
+                    JOptionPane.showMessageDialog(StudentProgramPanel.this, "Please enter a student ID and topic code.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
                     // Add the topic result for the student
-                    String studentID = studentNumberTextField.getText();
-                    StudentDatabase studentDB = new StudentDatabase();
-                    Student student = studentDB.findStudent(studentID);
+                    Student existingStudent = studentDB.findStudent(studentID);
+                    String r;
 
-                    if (student != null) {
-                        studentDB.addResult(studentID + "," + topicCode + "," + grade + "," + mark);
-                        JOptionPane.showMessageDialog(StudentProgramPanel.this, "Topic result has been added to the database.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    if (existingStudent != null) {  // If studentDB has this student
+                        if (mark.isEmpty()) {
+                            r = "R," + studentID + "," + topicCode + "," + grade;
+                        } else {
+                            r = "R," + studentID + "," + topicCode + "," + grade + "," + mark;
+                        }
+                        studentDB.addResult(r);
+
+                        try {
+                            FileWriter fileWriter = new FileWriter(filePath, true); // "true" appends to the existing file
+                            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                            bufferedWriter.write(r);
+                            bufferedWriter.newLine();
+                            bufferedWriter.close();
+                            JOptionPane.showMessageDialog(StudentProgramPanel.this, "Topic result has been added to the database.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        } catch (IOException exception) {
+                            // Handle the exception
+                            exception.printStackTrace();
+                            JOptionPane.showMessageDialog(StudentProgramPanel.this, "An error occurred while writing to the file.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
                     } else {
                         JOptionPane.showMessageDialog(StudentProgramPanel.this, "Student not found in the database.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
+        }
+    }
 
+
+    public class FindTopicResultButton implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
             // Find topic result button listener
-            if (e.getActionCommand().equals("Find Topic Result")) {
+            if (e.getActionCommand().equals("find topic result")) {
                 String studentID = studentNumberTextField.getText();
                 String topicCode = topicCodeTextField.getText();
-
-                StudentDatabase studentDB = new StudentDatabase();
-                Student student = studentDB.findStudent(studentID);
-
-                if (student != null) {
-                    Result result = studentDB.findResult(studentID, topicCode);
+                Student existingStudent = studentDB.findStudent(studentID);
+                Result result;
+                if (studentID.isEmpty() || topicCode.isEmpty()) {
+                    JOptionPane.showMessageDialog(StudentProgramPanel.this, "Please enter a student ID and topic code.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    result = studentDB.findResult(studentID, topicCode);
                     if (result != null) {
                         gradeComboBox.setSelectedItem(result.getGrade());
                         markTextField.setText(String.valueOf(result.getMark()));
@@ -350,10 +367,22 @@ public class StudentProgramPanel extends JPanel {
                         markTextField.setText("");
                         JOptionPane.showMessageDialog(StudentProgramPanel.this, "No matching topic result found.", "Message", JOptionPane.INFORMATION_MESSAGE);
                     }
-                } else {
-                    JOptionPane.showMessageDialog(StudentProgramPanel.this, "Student not found in the database.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
+        }
+    }
+
+    public class PrintAllRecordsButton implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+        }
+    }
+
+    public class ClearAllRecordsButton implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
         }
     }
 }
