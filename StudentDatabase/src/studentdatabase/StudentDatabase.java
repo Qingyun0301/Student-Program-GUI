@@ -58,8 +58,14 @@ public class StudentDatabase {
             case "M":
                 String mFamilyName = vars.next();
                 String mGivenNames = vars.next();
-                String medPrize = vars.next();
-                studentDatabase.add(new MedStudent(studentID, mFamilyName, mGivenNames, medPrize));
+                if (vars.hasNext()) {
+                    String medPrize = vars.next();
+                    studentDatabase.add(new MedStudent(studentID, mFamilyName, mGivenNames, medPrize));
+                } else {
+                    studentDatabase.add(new MedStudent(studentID, mFamilyName, mGivenNames));
+                }
+
+
                 break;
             case "S":
                 String sFamilyName = vars.next();

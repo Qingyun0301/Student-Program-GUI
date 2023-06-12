@@ -218,12 +218,18 @@ public class StudentProgramPanel extends JPanel {
                     String medPrize = textArea.getText();
 
                     String s;
-                    switch (degree) {
-                        case "Arts" ->
-                                s = "A," + studentID + "," + familyName + "," + givenName + "," + artMajor + "," + artMinor;
-                        case "Medicine" -> s = "M," + studentID + "," + familyName + "," + givenName + "," + medPrize;
-                        case "Science" -> s = "S," + studentID + "," + familyName + "," + givenName;
-                        default -> s = "";
+                    if (degree.equals("Arts")) {
+                        s = "A," + studentID + "," + familyName + "," + givenName + "," + artMajor + "," + artMinor;
+                    } else if (degree.equals("Medicine")) {
+                        if (medPrize == null){
+                            s = "M," + studentID + "," + familyName + "," + givenName;
+                        }else {
+                            s = "M," + studentID + "," + familyName + "," + givenName + "," + medPrize;
+                        }
+                    } else if (degree.equals("Science")) {
+                        s = "S," + studentID + "," + familyName + "," + givenName;
+                    } else {
+                        s = "";
                     }
 
                     studentDB.addStudent(s);
@@ -375,14 +381,18 @@ public class StudentProgramPanel extends JPanel {
     public class PrintAllRecordsButton implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            if (e.getActionCommand().equals("print records")) {
+                studentDB.printRecords();
+            }
         }
     }
 
     public class ClearAllRecordsButton implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            if (e.getActionCommand().equals("clear records")) {
+                studentDB.clearRecords();
+            }
         }
     }
 }

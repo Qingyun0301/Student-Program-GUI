@@ -9,6 +9,10 @@ public class MedStudent extends Student {
         return prize;
     }
 
+    public MedStudent(String studentID, String familyName, String givenNames) {
+        super(studentID, familyName, givenNames);
+        degree = "Medicine";
+    }
     public MedStudent(String studentID, String familyName, String givenNames, String medPrize) {
         super(studentID, familyName, givenNames);
         degree = "Medicine";

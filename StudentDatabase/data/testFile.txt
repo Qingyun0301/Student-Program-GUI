@@ -18,3 +18,7 @@ R,9800123,PSYC0123,FL,42
 
 P,Medicine 1 prize,MMED1,4
 P,Physics prize,PHYS,1
+A,123456,Smith,don,music,movie
+S,112233,John,mary
+M,445511,sam,jill,
+M,656565,yu,lia,aefafa
